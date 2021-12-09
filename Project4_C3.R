@@ -4,7 +4,7 @@
 # 환경설정
 
 rm(list=ls())
-install.packages("caret")
+install.packages("caret") #데이터파티션()
 install.packages("NbClust")
 install.packages("nnet")
 install.packages("neuralnet")
@@ -31,6 +31,39 @@ library(neuralnet)
 ## 3번문제 ####################################################################
 # iris 데이터에서 species 컬럼 데이터를 제거한 후 k-means clustering을 실행하고
 # 시각화 하시오.
+
+# 3-1)K-means clustering
+# (1)데이터 전처리
+data("iris")
+iris1 <- iris[,-5] #species 칼럼 데이터 제거
+
+inTrain <- createDataPartition(y = iris$Species, p = 0.7, list = F) #균등한 테스트를 위해 iris데이터 이용
+table(iris$Species[inTrain])
+
+training <- iris1[inTrain,]
+testing <- iris1[-inTrain,]
+
+# (2)표준화
+training.data <- scale(training)
+summary(training.data)
+
+# (3)모델생성
+iris.kmeans <- kmeans(training.data, centers = 3, iter.max = 10000)
+iris.kmeans$centers
+
+# (4)군집확인
+training$cluster <- as.factor(iris.kmeans$cluster)
+qplot(Petal.Width, Petal.Length, colour = cluster, data = training)
+qplot(Sepal.Width, Sepal.Length, colour = cluster, data = training)
+
+# (5)예측모델, 모델 정확성 확인
+training.data <- as.data.frame(training.data)
+modFit <- train(x = training.data, 
+                y = training$cluster,
+                method = "rpart")
+
+testing.data <- as.data.frame(scale(testing))
+testClusterPred <- predict(modFit, testing.data)
 
 
 
