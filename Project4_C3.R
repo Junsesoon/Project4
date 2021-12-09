@@ -8,6 +8,9 @@ install.packages("caret")
 install.packages("NbClust")
 install.packages("nnet")
 install.packages("neuralnet")
+install.packages('randomForest') #랜덤포레스트()
+
+library(randomForest)
 library(caret)
 library(NbClust)
 library(nnet)
@@ -125,6 +128,35 @@ model_result4 <- compute(model_net4, testing_nor4)
 cor(model_result1$net.result, testing_nor4$Diagnosis)
 cor(model_result3$net.result, testing_nor4$Diagnosis)
 cor(model_result4$net.result, testing_nor4$Diagnosis)
+
+
+
+
+# 1-5)앙상블 기법-랜덤 포레스트 기법 ####
+# (1) 데이터 전처리
+breastCancer <- read.csv('C:/Rwork/wdbc.csv', header = F) #데이터파일
+names(breastCancer) <- c('IDNumber', 'Diagnosis', 'radius', 'texture', 'perimeter',
+                         'area', 'smoothness', 'compactness', 'concavity',
+                         'concavePoints','symmetry', 'fractalDimension')
+breastCancer.RF <- breastCancer[c(2:12)]
+breastCancer.RF$Diagnosis <- as.factor(breastCancer.RF$Diagnosis) #종속변수 범주형 변환
+
+# (2) 학습데이터, 검증데이터 생성
+idx.RF <- createDataPartition(breastCancer.RF$Diagnosis, p = 0.7, list = F)
+breastTrain <- breastCancer.RF[idx.RF,] #학습데이터
+breastTest <- breastCancer.RF[-idx.RF,] #테스트데이터
+
+# (3) 랜덤포레스트 모델 생성
+formula1 = Diagnosis~.
+rfbreast <- randomForest(formula1, data=breastTrain, ntree=100, proximity=TRUE) 
+#proximity=TRUE 는 개체들 간의 근접도 행렬을 제공 : 동일한 최종노드에 포함되는 빈도에 기초함
+
+# (4) 모델 성능 확인
+table(predict(rfbreast), breastTrain$Diagnosis)
+plot(rfbreast)
+
+rf.predbreast <- predict(rfbreast, newdata = breastTest)
+r2 = table(rf.predbreast, breastTest$Diagnosis);r2; (r2[1,1]+r2[2,2])/nrow(breastTest)
 
 
 
