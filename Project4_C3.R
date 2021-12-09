@@ -8,6 +8,11 @@ install.packages("caret")
 install.packages("NbClust")
 install.packages("nnet")
 install.packages("neuralnet")
+install.packages('rpart') #의사결정트리
+install.packages("rpart.plot") #트리 시각화
+
+library(rpart)
+library(rpart.plot)
 library(caret)
 library(NbClust)
 library(nnet)
@@ -51,6 +56,38 @@ pred1 <- predict(a_model,test2) #예측치 생성
 pred1
 
 cor(pred1, test2$Rings) #회귀모델 평가
+
+
+
+
+# 2-3)의사결정트리 ####
+# (1) 데이터 준비
+abalone <- read.csv('C:/Rwork/abalone.csv', header = F); #데이터파일
+names(abalone) <- c('Sex', 'Length', 'Diameter', 'Height', 'WholeWeight',
+                    'ShuckedWeight','VisceraWeight','ShellWeight','Rings')
+abalone3 <- abalone
+abalone3$Sex[abalone3$Sex == 'M'] <- 1
+abalone3$Sex[abalone3$Sex == 'F'] <- 2
+abalone3$Sex[abalone3$Sex == 'I'] <- 0
+sexc <- abalone3$Sex
+sexi <- as.integer(sexc)
+abalone3$Sex <- sexi
+
+# (2) 학습데이터, 검정데이터 생성
+idx3 <- createDataPartition(abalone3$Rings, p = 0.7, list = F)
+abaloneTrain3 <- abalone3[idx3,] #학습데이터
+abaloneTest3 <- abalone3[-idx3,] #테스트데이터
+
+# (3) 의사결정트리(Decision Tree) 모델 생성
+rpartFit <- rpart(Rings ~ ., data = abaloneTrain3)
+summary(rpartFit)
+
+# (4) 시각화 및 성능평가
+rpart.plot(rpartFit, digits = 3, type = 0, extra = 1, fallen.leave = F, cex = 1)
+
+rpartPre <- predict(rpartFit, newdata = abaloneTest3)
+table(rpartPre, abaloneTest3$Rings)
+cor(rpartPre, abaloneTest3$Rings)
 
 
 
