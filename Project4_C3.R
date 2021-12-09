@@ -10,7 +10,9 @@ install.packages("nnet")
 install.packages("neuralnet") #인공신경망
 install.packages('rpart') #의사결정트리
 install.packages("rpart.plot") #트리 시각화
+install.packages('randomForest')
 
+library(randomForest) # 랜덤포레스트()
 library(rpart)
 library(rpart.plot)
 library(caret)
@@ -138,6 +140,37 @@ model_result43 <- compute(model_net43, testing_nor4[-9])
 # 상관관계를 통한 정확도 평가
 cor(model_result41$net.result, testing_nor4$Rings)
 cor(model_result43$net.result, testing_nor4$Rings)
+
+
+
+
+# 2-5)앙상블 기법-랜덤 포레스트 기법 ####
+# (1) 데이터 전처리
+abalone5 <- read.csv('C:/Rwork/abalone.csv', header = F); #데이터파일
+names(abalone5) <- c('Sex', 'Length', 'Diameter', 'Height', 'WholeWeight',
+                     'ShuckedWeight','VisceraWeight','ShellWeight','Rings')
+
+# (2) 학습데이터, 테스트데이터 생성
+idx5 <- createDataPartition(abalone5$Rings, p = 0.7, list = F)
+abaloneTrain <- abalone5[idx5,] #학습데이터
+abaloneTest <- abalone5[-idx5,] #테스트데이터
+
+# (3) 랜덤포레스트 모델 생성
+rfAba <- randomForest(Rings ~ ., data=abaloneTrain, ntree=100, proximity=TRUE) #컬럼명에 띄어쓰기 있으면 오류
+#proximity=TRUE 는 개체들 간의 근접도 행렬을 제공 : 동일한 최종노드에 포함되는 빈도에 기초함
+table(predict(rfAba), abaloneTrain$Rings)
+rfAba
+
+# (4) 중요 변수 출력 및 시각화
+importance(rfAba)
+
+varImpPlot(rfAba)
+plot(rfAba)
+
+# (5) 모델 평가
+rf.predAba <- predict(rfAba, newdata = abaloneTest)
+table(rf.predAba, abaloneTest$Rings)
+cor(rf.predAba, abaloneTest$Rings)
 
 
 
