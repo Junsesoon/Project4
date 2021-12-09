@@ -1,31 +1,27 @@
 ## Project4 C3 ################################################################
-# 기간: 21.11.22(월)
+# 기간: 21.11.22(월)까지
 # C3조: 오준서 천성한 한호종 황윤수
-# 환경설정
 
+  # 환경설정
 rm(list=ls())
+
+  # 라이브러리 모음
 install.packages("caret") #데이터파티션()
-install.packages("NbClust")
+install.packages("NbClust") #군집분석
 install.packages("nnet")
-<<<<<<< HEAD
 install.packages("neuralnet") #인공신경망
 install.packages('rpart') #의사결정트리
 install.packages("rpart.plot") #트리 시각화
-install.packages('randomForest')
-
-library(randomForest) # 랜덤포레스트()
-library(rpart)
-library(rpart.plot)
-=======
-install.packages("neuralnet")
 install.packages('randomForest') #랜덤포레스트()
 
-library(randomForest)
->>>>>>> no1
 library(caret)
 library(NbClust)
 library(nnet)
 library(neuralnet)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+
 
 ## 1번문제 ####################################################################
 # 위스콘신 유방암 데이터셋을 대상으로 분류기법 2개를 적용하여 기법별 결과를 비교하시오.
@@ -173,9 +169,8 @@ r2 = table(rf.predbreast, breastTest$Diagnosis);r2; (r2[1,1]+r2[2,2])/nrow(breas
 
 
 ## 2번문제 ####################################################################
-# Abalone Data 데이터셋을 대상으로 전복의 나이를 예측하고자 한다. 예측기법 2개를
-# 적용하여 기법별 결과를 비교하시오
-# 종속변수는 Rings를 사용
+# Abalone Data 데이터셋을 대상으로 전복의 나이를 예측하고자 한다. 
+# 예측기법 2개를 적용하여 기법별 결과를 비교하시오.(종속변수는 Rings를 사용)
 
 # 2-2)다중회귀분석 ####
 # (1)데이터 전처리
@@ -302,7 +297,8 @@ abaloneTest <- abalone5[-idx5,] #테스트데이터
 
 # (3) 랜덤포레스트 모델 생성
 rfAba <- randomForest(Rings ~ ., data=abaloneTrain, ntree=100, proximity=TRUE) #컬럼명에 띄어쓰기 있으면 오류
-#proximity=TRUE 는 개체들 간의 근접도 행렬을 제공 : 동일한 최종노드에 포함되는 빈도에 기초함
+  #proximity=TRUE: 개체들 간의 근접도 행렬을 제공
+    #             (=동일한 최종노드에 포함되는 빈도에 기초함)
 table(predict(rfAba), abaloneTrain$Rings)
 rfAba
 
