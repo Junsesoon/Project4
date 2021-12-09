@@ -44,6 +44,44 @@ confusionMatrix(predicted,positiveTest)
 
 
 
+# 1-3)의사결정트리 ####
+# (1) 데이터 전처리
+data1 <- read.csv('wdbc.csv',header = F)
+wisconsin3 <- data1 %>% select(1:12,) %>% 
+  `colnames<-`(c('id','양성여부','반경','질감','둘레','면적','매끄러움',
+                 '조그만정도','오목함','오목점','대칭','프랙탈차원'))
+# 자료형 변환
+wisconsin3$양성여부 <- as.factor(wisconsin3$양성여부)
+
+# (2) 분류모델 생성
+model_tree <- ctree(양성여부 ~ .,data=wisconsin3)
+
+tree <- rpart(양성여부 ~ ., data=wisconsin3)
+summary(tree)
+
+# (3) 분류분석 결과
+plot(model_tree)
+prp(tree, type=4, extra=2)
+
+# (4) 교차타당성오차
+tree$cptable
+opt <- which.min(tree$cptable[,"xerror"])
+cp <- tree$cptable[opt,"CP"]
+prune.c <- prune(tree,cp=cp)
+plotcp(tree)
+
+
+# id변수가 빠진 트리와의 비교
+wisconsin2 <- data1 %>% select(2:12,) %>% 
+  `colnames<-`(c('양성여부','반경','질감','둘레','면적','매끄러움','조그만정도',
+                 '오목함','오목점','대칭','프랙탈차원'))
+wisconsin2$양성여부 <- as.factor(wisconsin2$양성여부)
+model_tree2 <- ctree(양성여부 ~ .,data=wisconsin2)
+plot(model_tree2)
+
+
+
+
 ## 2번문제 ####################################################################
 # Abalone Data 데이터셋을 대상으로 전복의 나이를 예측하고자 한다. 예측기법 2개를
 # 적용하여 기법별 결과를 비교하시오
