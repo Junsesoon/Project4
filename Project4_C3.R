@@ -7,7 +7,7 @@ rm(list=ls())
 install.packages("caret")
 install.packages("NbClust")
 install.packages("nnet")
-install.packages("neuralnet")
+install.packages("neuralnet") #인공신경망
 install.packages('rpart') #의사결정트리
 install.packages("rpart.plot") #트리 시각화
 
@@ -88,6 +88,56 @@ rpart.plot(rpartFit, digits = 3, type = 0, extra = 1, fallen.leave = F, cex = 1)
 rpartPre <- predict(rpartFit, newdata = abaloneTest3)
 table(rpartPre, abaloneTest3$Rings)
 cor(rpartPre, abaloneTest3$Rings)
+
+
+
+
+# 2-4)인공신경망 ####
+# (1)데이터 전처리
+abalone <- read.csv('C:/Rwork/abalone.csv', header = F); #데이터파일
+names(abalone) <- c('Sex', 'Length', 'Diameter', 'Height', 'WholeWeight',
+                    'ShuckedWeight','VisceraWeight','ShellWeight','Rings')
+abalone4 <- abalone
+abalone4$Sex[abalone4$Sex == 'M'] <- 1
+abalone4$Sex[abalone4$Sex == 'F'] <- 2
+abalone4$Sex[abalone4$Sex == 'I'] <- 0
+sexc <- abalone4$Sex
+sexi <- as.integer(sexc)
+abalone4$Sex <- sexi
+
+idx4 <- createDataPartition(abalone4$Rings, p = 0.7, list = F)
+abaloneTrain <- abalone4[idx4,] #학습데이터
+abaloneTest <- abalone4[-idx4,] #테스트데이터
+
+# (2)데이터 정규화
+normal <- function(x){
+  return((x - min(x))/(max(x)-min(x)))
+}
+
+# (3)학습데이터, 검정데이터 생성
+training_nor4 <- as.data.frame(lapply(abaloneTrain, normal))
+summary(training_nor4)
+testing_nor4 <- as.data.frame(lapply(abaloneTest, normal))
+summary(testing_nor4)
+
+# (4)인공신경망 모델 생성
+model_net41 = neuralnet(Rings ~ ., data = training_nor4, hidden = 1)
+model_net41
+
+model_net43 = neuralnet(Rings ~ ., data = training_nor4, hidden = 3)
+model_net43
+
+# (5)시각화
+plot(model_net41)
+plot(model_net43)
+
+# (6)분류모델 성능 평가
+# compute()사용
+model_result41 <- compute(model_net41, testing_nor4[-9])
+model_result43 <- compute(model_net43, testing_nor4[-9])
+# 상관관계를 통한 정확도 평가
+cor(model_result41$net.result, testing_nor4$Rings)
+cor(model_result43$net.result, testing_nor4$Rings)
 
 
 
