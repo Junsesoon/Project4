@@ -82,6 +82,53 @@ plot(model_tree2)
 
 
 
+# 1-4)인공신경망 ####
+# (1) 데이터셋 생성
+breastCancer <- read.csv('C:/Rwork/wdbc.csv', header = F); #데이터파일
+names(breastCancer) <- c('IDNumber', 'Diagnosis', 'radius', 'texture', 'perimeter',
+                         'area', 'smoothness', 'compactness', 'concavity', 'concavePoints',
+                         'symmetry', 'fractalDimension')
+breastCancer4 <- breastCancer[c(2:12)]
+
+# (2) 범주형 변수를 수치형으로 변환
+breastCancer4$Diagnosis[breastCancer4$Diagnosis == 'B'] <- 1
+breastCancer4$Diagnosis[breastCancer4$Diagnosis == 'M'] <- 2
+breastCancer4$Diagnosis <- as.integer(breastCancer4$Diagnosis)
+
+# (3) 학습 데이터, 검정 데이터 생성
+idx4 <- createDataPartition(breastCancer4$Diagnosis, p = 0.7, list = F)
+training_breast4 = breastCancer4[idx4,] #위 index값 그대로 사용
+testing_breast4 = breastCancer4[-idx4,]
+
+# (4) 데이터 정규화
+normal <- function(x){
+  return((x - min(x))/(max(x)-min(x)))
+}
+training_nor4 <- as.data.frame(lapply(training_breast4, normal))
+testing_nor4 <- as.data.frame(lapply(testing_breast4, normal))
+
+# (5) 인공신경망 모델 생성 
+formula4 = Diagnosis~.
+model_net1 = neuralnet(formula4, data = training_nor4, hidden = 1)
+#plot(model_net1)
+model_net3 = neuralnet(formula4, data = training_nor4, hidden = 3)
+#plot(model_net3)
+model_net4 = neuralnet(formula4, data = training_nor4, hidden = 4)
+#plot(model_net4)
+
+# (6) 분류모델 성능 평가
+# compute()사용
+model_result1 <- compute(model_net1, testing_nor4)
+model_result3 <- compute(model_net3, testing_nor4)
+model_result4 <- compute(model_net4, testing_nor4)
+# 상관관계분석
+cor(model_result1$net.result, testing_nor4$Diagnosis)
+cor(model_result3$net.result, testing_nor4$Diagnosis)
+cor(model_result4$net.result, testing_nor4$Diagnosis)
+
+
+
+
 ## 2번문제 ####################################################################
 # Abalone Data 데이터셋을 대상으로 전복의 나이를 예측하고자 한다. 예측기법 2개를
 # 적용하여 기법별 결과를 비교하시오
